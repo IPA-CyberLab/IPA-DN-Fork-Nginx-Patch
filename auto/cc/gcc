@@ -48,9 +48,9 @@ esac
 
 # optimizations
 
-#NGX_GCC_OPT="-O2"
+NGX_GCC_OPT="-O2"
 #NGX_GCC_OPT="-Os"
-NGX_GCC_OPT="-O"
+#NGX_GCC_OPT="-O"
 
 #CFLAGS="$CFLAGS -fomit-frame-pointer"
 
@@ -166,7 +166,9 @@ esac
 
 
 # stop on warning
-CFLAGS="$CFLAGS -Werror"
+#CFLAGS="$CFLAGS -Werror"
+
+CFLAGS="$CFLAGS -Wno-deprecated"
 
 # debug
 CFLAGS="$CFLAGS -g"
