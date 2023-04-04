@@ -168,7 +168,7 @@ esac
 # stop on warning
 #CFLAGS="$CFLAGS -Werror"
 
-CFLAGS="$CFLAGS -Wno-deprecated"
+CFLAGS="$CFLAGS -Wno-deprecated -I/root/openssl_static_lib/out/include/"
 
 # debug
 CFLAGS="$CFLAGS -g"
