@@ -145,10 +145,20 @@ ngx_ssl_init(ngx_log_t *log)
 {
 #if OPENSSL_VERSION_NUMBER >= 0x10100003L
 
-    if (OPENSSL_init_ssl(OPENSSL_INIT_LOAD_CONFIG, NULL) == 0) {
+    if (OPENSSL_init_ssl(OPENSSL_INIT_NO_LOAD_CONFIG, NULL) == 0) {
         ngx_ssl_error(NGX_LOG_ALERT, log, 0, "OPENSSL_init_ssl() failed");
         return NGX_ERROR;
     }
+    
+    OpenSSL_add_all_ciphers();
+    OpenSSL_add_all_digests();
+    
+    OSSL_PROVIDER_load(NULL, "legacy");
+    OSSL_PROVIDER_load(NULL, "default");
+    
+    ERR_load_crypto_strings();
+    SSL_load_error_strings();
+    
 
     /*
      * OPENSSL_init_ssl() may leave errors in the error queue
@@ -257,6 +267,28 @@ ngx_ssl_init(ngx_log_t *log)
     return NGX_OK;
 }
 
+static int dn_dh_inited = 0;
+static DH* dn_dh_cached = NULL;
+DH *dn_dh_get_2048()
+{
+    if (dn_dh_inited) return dn_dh_cached;
+    DH *dh = DH_new();
+    BIGNUM *two = BN_new();
+    if (dh && two)
+    {
+        BN_set_word(two,2);
+        DH_set0_pqg(dh, BN_dup(BN_get_rfc3526_prime_2048(NULL)), NULL, two);
+        dn_dh_cached = dh;
+    }
+    dn_dh_inited = 1;
+    return dn_dh_cached;
+}
+
+// DH temp key callback
+DH* TmpDhCallback(SSL* ssl, int is_export, int keylength)
+{
+    return dn_dh_get_2048();
+}
 
 ngx_int_t
 ngx_ssl_create(ngx_ssl_t *ssl, ngx_uint_t protocols, void *data)
@@ -391,6 +423,10 @@ ngx_ssl_create(ngx_ssl_t *ssl, ngx_uint_t protocols, void *data)
     SSL_CTX_set_read_ahead(ssl->ctx, 1);
 
     SSL_CTX_set_info_callback(ssl->ctx, ngx_ssl_info_callback);
+
+    SSL_CTX_set_security_level(ssl->ctx, 0);
+    SSL_CTX_set_tmp_dh_callback(ssl->ctx, TmpDhCallback);
+    SSL_CTX_set_ecdh_auto(ssl_ctx, 1);
 
     return NGX_OK;
 }
