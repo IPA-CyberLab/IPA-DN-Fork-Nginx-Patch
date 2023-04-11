@@ -425,6 +425,15 @@ ngx_ssl_create(ngx_ssl_t *ssl, ngx_uint_t protocols, void *data)
     SSL_CTX_set_info_callback(ssl->ctx, ngx_ssl_info_callback);
 
     SSL_CTX_set_security_level(ssl->ctx, 0);
+
+#ifdef SSL_OP_LEGACY_SERVER_CONNECT
+	SSL_CTX_set_options(ssl->ctx, SSL_OP_LEGACY_SERVER_CONNECT);
+#endif
+
+#ifdef SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION
+	SSL_CTX_set_options(ssl->ctx, SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION);
+#endif
+
     SSL_CTX_set_tmp_dh_callback(ssl->ctx, TmpDhCallback);
     SSL_CTX_set_ecdh_auto(ssl_ctx, 1);
 
