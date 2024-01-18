@@ -634,6 +634,8 @@ destination_done:
         goto invalid_destination;
     }
 
+    // https://qiita.com/shiwork/items/7277d9f995a5469c20c4
+    /*
     if ((r->uri.data[r->uri.len - 1] == '/' && *(last - 1) != '/')
         || (r->uri.data[r->uri.len - 1] != '/' && *(last - 1) == '/'))
     {
@@ -643,6 +645,7 @@ destination_done:
                       &r->uri, &dest->value);
         return NGX_HTTP_CONFLICT;
     }
+    */
 
     depth = ngx_http_dav_depth(r, NGX_HTTP_DAV_INFINITY_DEPTH);
 
